@@ -1,0 +1,1275 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fordonsfotoarkiv</title>
+  <style>
+    :root {
+      --bg: #0a101b;
+      --bg-2: #121c2e;
+      --panel: rgba(255,255,255,0.045);
+      --panel-2: rgba(255,255,255,0.065);
+      --line: rgba(255,255,255,0.09);
+      --text: #ecf3ff;
+      --muted: #9eb0cf;
+      --accent: #74b8ff;
+      --accent-2: #9ee7c9;
+      --warn: #8b93a8;
+      --shadow: 0 18px 46px rgba(0,0,0,.34);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --slot-h: 98px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top right, rgba(116,184,255,.10), transparent 26%),
+        radial-gradient(circle at left top, rgba(158,231,201,.08), transparent 18%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; }
+
+    .shell {
+      width: min(1560px, calc(100% - 24px));
+      margin: 18px auto 32px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .hero h1 {
+      margin: 0 0 6px;
+      font-size: clamp(24px, 4vw, 38px);
+      line-height: 1.08;
+      letter-spacing: -.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      align-content: start;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.1fr .75fr .75fr auto;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .input, .select, .btn {
+      min-height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .input, .select {
+      background: rgba(255,255,255,.045);
+      padding: 12px 14px;
+      outline: none;
+      color: var(--text);
+    }
+
+    /* Fix för dropdown-läsbarhet */
+    select {
+      color: #ffffff;
+      background-color: #1a2436;
+    }
+
+    select option {
+      color: #000000;
+      background: #ffffff;
+    }
+
+    .input::placeholder { color: #8fa0c1; }
+
+    .btn {
+      background: linear-gradient(180deg, rgba(116,184,255,.18), rgba(116,184,255,.10));
+      cursor: pointer;
+      padding: 0 18px;
+    }
+
+    .btn:hover { border-color: rgba(116,184,255,.45); }
+
+    .panel {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .breadcrumbs {
+      margin: 14px 0 18px;
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .crumb {
+      border: 1px solid var(--line);
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .crumb.active {
+      color: var(--text);
+      border-color: rgba(116,184,255,.35);
+    }
+
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .page-head h2 {
+      margin: 0 0 4px;
+      font-size: clamp(22px, 3vw, 30px);
+      letter-spacing: -.02em;
+    }
+
+    .subtle {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+        var(--bg-2);
+      min-height: 152px;
+      padding: 16px;
+      transition: transform .12s ease, border-color .12s ease;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(116,184,255,.36);
+    }
+
+    .eyebrow {
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      letter-spacing: -.02em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .badge {
+      font-size: 12px;
+      color: var(--text);
+      background: rgba(116,184,255,.12);
+      border: 1px solid rgba(116,184,255,.2);
+      border-radius: 999px;
+      padding: 6px 9px;
+    }
+
+    .alias {
+      margin-top: 8px;
+      color: #c8d3ea;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .grid-wrap {
+      padding: 14px;
+    }
+
+    .hundred-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .slot {
+      position: relative;
+      min-height: var(--slot-h);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease;
+    }
+
+    .slot:hover {
+      transform: translateY(-1px);
+      border-color: rgba(116,184,255,.36);
+    }
+
+    .slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #0b111c;
+    }
+
+    .slot .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.42));
+      pointer-events: none;
+    }
+
+    .slot-top {
+      position: absolute;
+      inset: 6px 6px auto 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .chip {
+      background: rgba(6,12,22,.74);
+      border: 1px solid rgba(255,255,255,.10);
+      color: white;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      backdrop-filter: blur(4px);
+    }
+
+    .missing {
+      background: linear-gradient(135deg, rgba(255,255,255,.025), rgba(255,255,255,.05));
+      cursor: default;
+    }
+
+    .missing:hover {
+      transform: none;
+      border-color: var(--line);
+    }
+
+    .slot-center {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 8px;
+      color: #8ea1c5;
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .slot-footer {
+      position: absolute;
+      inset: auto 6px 6px 6px;
+      text-align: center;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 14px;
+    }
+
+    .photo-card {
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      cursor: pointer;
+    }
+
+    .photo-card img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      display: block;
+      object-fit: cover;
+      background: #0c1018;
+    }
+
+    .photo-meta {
+      padding: 12px 13px 14px;
+    }
+
+    .photo-meta h3 {
+      margin: 0 0 5px;
+      font-size: 17px;
+      line-height: 1.25;
+    }
+
+    .photo-meta p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .empty {
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(4,8,16,.88);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 18px;
+    }
+
+    .lightbox.open { display: flex; }
+
+    .lightbox-inner {
+      width: min(1380px, 100%);
+      max-height: calc(100vh - 36px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+      background: rgba(10,16,27,.94);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .lightbox-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lightbox-head h3 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .lightbox-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 4px;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    .lightbox-view {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      background: rgba(255,255,255,.025);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .lightbox-view img {
+      display: block;
+      max-width: 100%;
+      max-height: calc(100vh - 240px);
+      object-fit: contain;
+    }
+
+    .thumb-strip {
+      display: flex;
+      gap: 8px;
+      overflow: auto;
+      padding-bottom: 2px;
+    }
+
+    .thumb-strip button {
+      flex: 0 0 auto;
+      width: 110px;
+      height: 72px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      padding: 0;
+      background: #09111d;
+      cursor: pointer;
+    }
+
+    .thumb-strip button.active { border-color: rgba(116,184,255,.58); }
+    .thumb-strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+      .hero { grid-template-columns: 1fr; }
+      .stats { justify-content: flex-start; }
+      .hundred-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+      .toolbar { grid-template-columns: 1fr; }
+      .hundred-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 14px, 1560px); }
+      .hero { border-radius: 18px; padding: 14px; }
+      .page-head { flex-direction: column; align-items: start; }
+      .hundred-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+      :root { --slot-h: 104px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <h1 id="siteTitle">Fordonsfotoarkiv</h1>
+        <p id="siteSubtitle">Bussar, pendeltåg och spårvagnar i ett sökbart arkiv. Bussar sorteras på operatör, järnvägsfordon på fordonstyp.</p>
+        <div class="toolbar">
+          <input id="searchInput" class="input" type="search" placeholder="Sök t.ex. Nobina 2758, X1 1223 eller B45 732" />
+          <select id="categoryFilter" class="select">
+            <option value="">Alla kategorier</option>
+            <option value="bus">Bussar</option>
+            <option value="train">Pendeltåg</option>
+            <option value="tram">Spårvagnar</option>
+          </select>
+          <select id="subFilter" class="select">
+            <option value="">Alla operatörer / typer</option>
+          </select>
+          <button id="searchBtn" class="btn">Sök</button>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <nav class="breadcrumbs panel" id="breadcrumbs"></nav>
+    <main id="app"></main>
+    <div class="footer-note">Demoformat som stöds nu: <strong>nobina2758-1.jpg</strong>, <strong>1223-x1-1.jpg</strong>, <strong>732-b45-1.jpg</strong>. Historik/overrides kan fyllas på senare.</div>
+  </div>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-inner">
+      <div class="lightbox-head">
+        <div>
+          <h3 id="lightboxTitle">Fordon</h3>
+          <div class="lightbox-sub" id="lightboxSub"></div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="icon-btn" id="prevPhotoBtn">← Föregående</button>
+          <button class="icon-btn" id="nextPhotoBtn">Nästa →</button>
+          <button class="icon-btn" id="closeLightboxBtn">Stäng</button>
+        </div>
+      </div>
+      <div class="lightbox-view">
+        <img id="lightboxImage" alt="Fordon" />
+      </div>
+      <div class="thumb-strip" id="thumbStrip"></div>
+    </div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      siteTitle: 'Fordonsfotoarkiv',
+      siteSubtitle: 'Bussar, pendeltåg och spårvagnar i ett sökbart arkiv. Bussar sorteras på operatör, järnvägsfordon på fordonstyp.',
+      manifestUrl: './images/manifest.json',
+      imagesBaseUrl: './images/'
+    };
+
+    const OPERATOR_RULES = {
+      nobina: {
+        displayName: 'Nobina',
+        aliases: ['nobina', 'swebus'],
+        formerNames: ['Swebus']
+      },
+      keolis: {
+        displayName: 'Keolis',
+        aliases: ['keolis', 'busslink'],
+        formerNames: ['Busslink']
+      },
+      transdev: {
+        displayName: 'Transdev',
+        aliases: ['transdev', 'veolia', 'connex', 'linjebuss'],
+        formerNames: ['Veolia', 'Connex', 'Linjebuss']
+      }
+    };
+
+    const FALLBACK_FILES = [
+      'swebus3722-1.jpg',
+      'nobina2758-1.jpg',
+      'nobina2758-2.jpg',
+      'keolis2738-1.jpg',
+      '1223-x1-1.jpg',
+      '1223-x1-2.jpg',
+      '1407-x60-1.jpg',
+      '732-b45-1.jpg',
+      '742-a35-1.jpg'
+    ];
+
+    const state = {
+      records: [],
+      vehicles: [],
+      currentView: 'home',
+      category: '',
+      group: '',
+      thousand: null,
+      hundred: null,
+      q: '',
+      lightboxVehicleKey: null,
+      lightboxIndex: 0
+    };
+
+    const els = {
+      app: document.getElementById('app'),
+      stats: document.getElementById('stats'),
+      breadcrumbs: document.getElementById('breadcrumbs'),
+      siteTitle: document.getElementById('siteTitle'),
+      siteSubtitle: document.getElementById('siteSubtitle'),
+      searchInput: document.getElementById('searchInput'),
+      categoryFilter: document.getElementById('categoryFilter'),
+      subFilter: document.getElementById('subFilter'),
+      searchBtn: document.getElementById('searchBtn'),
+      lightbox: document.getElementById('lightbox'),
+      lightboxTitle: document.getElementById('lightboxTitle'),
+      lightboxSub: document.getElementById('lightboxSub'),
+      lightboxImage: document.getElementById('lightboxImage'),
+      thumbStrip: document.getElementById('thumbStrip'),
+      prevPhotoBtn: document.getElementById('prevPhotoBtn'),
+      nextPhotoBtn: document.getElementById('nextPhotoBtn'),
+      closeLightboxBtn: document.getElementById('closeLightboxBtn')
+    };
+
+    els.siteTitle.textContent = CONFIG.siteTitle;
+    els.siteSubtitle.textContent = CONFIG.siteSubtitle;
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function slugify(str) {
+      return String(str || '').toLowerCase().replace(/[^a-z0-9åäö]+/gi, '');
+    }
+
+    function titleCase(str) {
+      return String(str || '')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ')
+        .filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    function canonicalBusOperator(rawOperator) {
+      const key = slugify(rawOperator);
+      for (const rule of Object.values(OPERATOR_RULES)) {
+        if (rule.aliases.some(a => slugify(a) === key)) {
+          return {
+            key: slugify(rule.displayName),
+            displayName: rule.displayName,
+            rawName: titleCase(rawOperator),
+            formerNames: rule.formerNames || []
+          };
+        }
+      }
+      return {
+        key,
+        displayName: titleCase(rawOperator),
+        rawName: titleCase(rawOperator),
+        formerNames: []
+      };
+    }
+
+    function parseBus(filename) {
+      const clean = filename.split('/').pop().replace(/\?.*$/, '');
+      const match = clean.match(/^([a-zA-ZåäöÅÄÖ_-]+?)(\d{1,5})(?:-(\d+))?\.(jpe?g|png|webp|gif)$/i);
+      if (!match) return null;
+      const [, rawOperator, num, imageOrder] = match;
+      const canon = canonicalBusOperator(rawOperator);
+      const vehicleNumber = Number(num);
+      return {
+        kind: 'bus',
+        categoryLabel: 'Buss',
+        rawOperator: canon.rawName,
+        operator: canon.displayName,
+        operatorKey: canon.key,
+        formerNames: canon.formerNames,
+        vehicleType: '',
+        vehicleTypeKey: '',
+        vehicleNumber,
+        imageOrder: Number(imageOrder || 1),
+        thousand: Math.floor(vehicleNumber / 1000) * 1000,
+        hundred: Math.floor(vehicleNumber / 100) * 100,
+        searchText: `${canon.displayName} ${canon.rawName} ${canon.formerNames.join(' ')} ${vehicleNumber}`.toLowerCase()
+      };
+    }
+
+    function parseRail(filename, forcedKind = '') {
+      const clean = filename.split('/').pop().replace(/\?.*$/, '');
+      const match = clean.match(/^(\d{1,5})-([a-zA-Z0-9]+)-(\d+)\.(jpe?g|png|webp|gif)$/i);
+      if (!match) return null;
+      const [, num, type, imageOrder] = match;
+      const typeUpper = type.toUpperCase();
+      const kind = forcedKind || (typeUpper.startsWith('X') ? 'train' : 'tram');
+      return {
+        kind,
+        categoryLabel: kind === 'train' ? 'Pendeltåg' : 'Spårvagn',
+        rawOperator: '',
+        operator: '',
+        operatorKey: '',
+        formerNames: [],
+        vehicleType: typeUpper,
+        vehicleTypeKey: slugify(typeUpper),
+        vehicleNumber: Number(num),
+        imageOrder: Number(imageOrder || 1),
+        thousand: Math.floor(Number(num) / 1000) * 1000,
+        hundred: Math.floor(Number(num) / 100) * 100,
+        searchText: `${typeUpper} ${num} ${kind === 'train' ? 'pendeltåg' : 'spårvagn'}`.toLowerCase()
+      };
+    }
+
+    function parseRecord(file) {
+      const url = /^https?:/i.test(file)
+        ? file
+        : CONFIG.imagesBaseUrl.replace(/\/$/, '') + '/' + String(file).split('/').pop();
+      const base = parseRail(file) || parseBus(file);
+      if (!base) return null;
+      return {
+        ...base,
+        filename: String(file).split('/').pop(),
+        url
+      };
+    }
+
+    function buildVehicleGroups(records) {
+      const map = new Map();
+      for (const rec of records) {
+        const key = rec.kind === 'bus'
+          ? `bus|${rec.operatorKey}|${rec.vehicleNumber}`
+          : `${rec.kind}|${rec.vehicleTypeKey}|${rec.vehicleNumber}`;
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(rec);
+      }
+
+      return [...map.entries()].map(([key, images]) => {
+        images.sort((a, b) => a.imageOrder - b.imageOrder || a.filename.localeCompare(b.filename));
+        const first = images[0];
+        return {
+          key,
+          kind: first.kind,
+          categoryLabel: first.categoryLabel,
+          operator: first.operator,
+          operatorKey: first.operatorKey,
+          rawOperator: first.rawOperator,
+          formerNames: first.formerNames || [],
+          vehicleType: first.vehicleType,
+          vehicleTypeKey: first.vehicleTypeKey,
+          vehicleNumber: first.vehicleNumber,
+          thousand: first.thousand,
+          hundred: first.hundred,
+          images,
+          primaryImage: first,
+          displayTitle: first.kind === 'bus'
+            ? `${first.operator} ${first.vehicleNumber}`
+            : `${first.vehicleType} ${first.vehicleNumber}`,
+          subTitle: first.kind === 'bus'
+            ? [first.rawOperator && first.rawOperator !== first.operator ? `Filnamn: ${first.rawOperator}` : '', first.formerNames?.length ? `Tidigare: ${first.formerNames.join(', ')}` : ''].filter(Boolean).join(' · ')
+            : `${first.categoryLabel}`
+        };
+      }).sort((a, b) => {
+        if (a.kind !== b.kind) return a.kind.localeCompare(b.kind);
+        if ((a.operator || a.vehicleType) !== (b.operator || b.vehicleType)) {
+          return (a.operator || a.vehicleType).localeCompare(b.operator || b.vehicleType, 'sv');
+        }
+        return a.vehicleNumber - b.vehicleNumber;
+      });
+    }
+
+    function getCategoryStats() {
+      const categories = ['bus', 'train', 'tram'];
+      return categories.map(category => ({
+        category,
+        count: state.vehicles.filter(v => v.kind === category).length,
+        photos: state.records.filter(r => r.kind === category).length
+      }));
+    }
+
+    function renderStats() {
+      const totalVehicles = state.vehicles.length;
+      const totalPhotos = state.records.length;
+      const cats = getCategoryStats();
+      els.stats.innerHTML = [
+        `<div class="pill">Fordon: <strong>${totalVehicles}</strong></div>`,
+        `<div class="pill">Bilder: <strong>${totalPhotos}</strong></div>`,
+        ...cats.map(c => `<div class="pill">${c.category === 'bus' ? 'Bussar' : c.category === 'train' ? 'Pendeltåg' : 'Spårvagnar'}: <strong>${c.count}</strong></div>`)
+      ].join('');
+    }
+
+    function getSubOptions(category) {
+      if (category === 'bus') {
+        const map = new Map();
+        state.vehicles.filter(v => v.kind === 'bus').forEach(v => {
+          if (!map.has(v.operatorKey)) {
+            map.set(v.operatorKey, {
+              key: v.operatorKey,
+              label: v.operator,
+              formerNames: v.formerNames || [],
+              count: 0
+            });
+          }
+          map.get(v.operatorKey).count += 1;
+        });
+        return [...map.values()].sort((a, b) => a.label.localeCompare(b.label, 'sv'));
+      }
+      if (category === 'train' || category === 'tram') {
+        const map = new Map();
+        state.vehicles.filter(v => v.kind === category).forEach(v => {
+          if (!map.has(v.vehicleTypeKey)) {
+            map.set(v.vehicleTypeKey, { key: v.vehicleTypeKey, label: v.vehicleType, count: 0 });
+          }
+          map.get(v.vehicleTypeKey).count += 1;
+        });
+        return [...map.values()].sort((a, b) => a.label.localeCompare(b.label, 'sv'));
+      }
+      return [];
+    }
+
+    function renderSubFilter() {
+      const options = getSubOptions(state.category);
+      let label = 'Alla operatörer / typer';
+      if (state.category === 'bus') label = 'Alla operatörer';
+      if (state.category === 'train' || state.category === 'tram') label = 'Alla fordonstyper';
+      els.subFilter.innerHTML = `<option value="">${esc(label)}</option>` + options.map(opt =>
+        `<option value="${esc(opt.key)}">${esc(opt.label)} (${opt.count})</option>`
+      ).join('');
+      els.subFilter.value = state.group || '';
+    }
+
+    function setHash(view, extra = {}) {
+      const params = new URLSearchParams();
+      params.set('view', view);
+      if (extra.category) params.set('category', extra.category);
+      if (extra.group) params.set('group', extra.group);
+      if (extra.thousand != null) params.set('thousand', extra.thousand);
+      if (extra.hundred != null) params.set('hundred', extra.hundred);
+      if (extra.q) params.set('q', extra.q);
+      location.hash = params.toString();
+    }
+
+    function readHash() {
+      const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+      state.currentView = params.get('view') || 'home';
+      state.category = params.get('category') || '';
+      state.group = params.get('group') || '';
+      state.thousand = params.get('thousand') ? Number(params.get('thousand')) : null;
+      state.hundred = params.get('hundred') ? Number(params.get('hundred')) : null;
+      state.q = params.get('q') || '';
+
+      els.searchInput.value = state.q;
+      els.categoryFilter.value = state.category;
+      renderSubFilter();
+    }
+
+    function renderBreadcrumbs() {
+      const parts = [`<a class="crumb ${state.currentView === 'home' ? 'active' : ''}" href="#view=home">Start</a>`];
+      if (state.category) {
+        const categoryLabel = state.category === 'bus' ? 'Bussar' : state.category === 'train' ? 'Pendeltåg' : 'Spårvagnar';
+        parts.push(`<a class="crumb ${state.currentView === 'category' ? 'active' : ''}" href="#view=category&category=${encodeURIComponent(state.category)}">${esc(categoryLabel)}</a>`);
+      }
+      if (state.group) {
+        const subOptions = getSubOptions(state.category);
+        const match = subOptions.find(o => o.key === state.group);
+        if (match) parts.push(`<a class="crumb ${state.currentView === 'group' ? 'active' : ''}" href="#view=group&category=${encodeURIComponent(state.category)}&group=${encodeURIComponent(state.group)}">${esc(match.label)}</a>`);
+      }
+      if (state.thousand != null) {
+        parts.push(`<a class="crumb ${state.currentView === 'thousand' ? 'active' : ''}" href="#view=thousand&category=${encodeURIComponent(state.category)}&group=${encodeURIComponent(state.group)}&thousand=${state.thousand}">${state.thousand}-${state.thousand + 999}</a>`);
+      }
+      if (state.hundred != null) {
+        parts.push(`<span class="crumb active">${state.hundred}-${state.hundred + 99}</span>`);
+      }
+      if (state.currentView === 'search' && state.q) {
+        parts.push(`<span class="crumb active">Sök: ${esc(state.q)}</span>`);
+      }
+      els.breadcrumbs.innerHTML = parts.join('<span>›</span>');
+    }
+
+    function categoryTitle(category) {
+      return category === 'bus' ? 'Bussar' : category === 'train' ? 'Pendeltåg' : 'Spårvagnar';
+    }
+
+    function vehiclesForCategory(category) {
+      return state.vehicles.filter(v => v.kind === category);
+    }
+
+    function vehiclesForGroup(category, group) {
+      if (category === 'bus') return vehiclesForCategory(category).filter(v => v.operatorKey === group);
+      return vehiclesForCategory(category).filter(v => v.vehicleTypeKey === group);
+    }
+
+    function renderHome() {
+      const categories = [
+        { key: 'bus', title: 'Bussar', desc: 'Operatör först, sedan 1000-tal, 100-tal och 10×10-grid med luckor.', count: vehiclesForCategory('bus').length },
+        { key: 'train', title: 'Pendeltåg', desc: 'Sorteras på fordonstyp, exempelvis X1 och X60, sedan på nummer.', count: vehiclesForCategory('train').length },
+        { key: 'tram', title: 'Spårvagnar', desc: 'Sorteras på fordonstyp, exempelvis B45, sedan på vagnsnummer.', count: vehiclesForCategory('tram').length }
+      ];
+
+      els.app.innerHTML = `
+        <section>
+          <div class="page-head">
+            <div>
+              <h2>Välj kategori</h2>
+              <div class="subtle">Bussar och spårtrafik får olika logik från början i stället för att pressas in i samma mall.</div>
+            </div>
+          </div>
+          <div class="section-grid">
+            ${categories.map(cat => `
+              <a class="card" href="#view=category&category=${cat.key}">
+                <div class="eyebrow">Kategori</div>
+                <h3>${esc(cat.title)}</h3>
+                <p>${esc(cat.desc)}</p>
+                <div class="badge-row">
+                  <span class="badge">${cat.count} fordon</span>
+                  <span class="badge">Öppna</span>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCategory() {
+      if (!state.category) return renderHome();
+      const title = categoryTitle(state.category);
+      const options = getSubOptions(state.category);
+      els.app.innerHTML = `
+        <section>
+          <div class="page-head">
+            <div>
+              <h2>${esc(title)}</h2>
+              <div class="subtle">${state.category === 'bus' ? 'Operatörerna visar även tidigare namn i rubrikerna.' : 'Välj fordonstyp för att komma vidare till nummerserier.'}</div>
+            </div>
+            <div class="subtle">${options.reduce((sum, o) => sum + o.count, 0)} fordon</div>
+          </div>
+          <div class="section-grid">
+            ${options.map(opt => `
+              <a class="card" href="#view=group&category=${encodeURIComponent(state.category)}&group=${encodeURIComponent(opt.key)}">
+                <div class="eyebrow">${state.category === 'bus' ? 'Operatör' : 'Fordonstyp'}</div>
+                <h3>${esc(opt.label)}</h3>
+                <p>${state.category === 'bus' ? 'Bussarkiv med historiska operatörsnamn i underrubrik.' : 'Översikt och nummerspann för denna fordonstyp.'}</p>
+                ${state.category === 'bus' && opt.formerNames?.length ? `<div class="alias">Tidigare: ${esc(opt.formerNames.join(', '))}</div>` : ''}
+                <div class="badge-row">
+                  <span class="badge">${opt.count} fordon</span>
+                  <span class="badge">Visa</span>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderGroup() {
+      if (!state.category || !state.group) return renderCategory();
+      const vehicles = vehiclesForGroup(state.category, state.group);
+      if (!vehicles.length) return renderCategory();
+      const label = state.category === 'bus' ? vehicles[0].operator : vehicles[0].vehicleType;
+      const former = state.category === 'bus' ? vehicles[0].formerNames : [];
+
+      const thousandMap = new Map();
+      vehicles.forEach(v => {
+        if (!thousandMap.has(v.thousand)) thousandMap.set(v.thousand, { thousand: v.thousand, vehicleCount: 0, photoCount: 0 });
+        const row = thousandMap.get(v.thousand);
+        row.vehicleCount += 1;
+        row.photoCount += v.images.length;
+      });
+
+      const thousands = [...thousandMap.values()].sort((a, b) => a.thousand - b.thousand);
+
+      els.app.innerHTML = `
+        <section>
+          <div class="page-head">
+            <div>
+              <h2>${esc(label)}</h2>
+              <div class="subtle">${state.category === 'bus' ? `Bussoperatör.${former.length ? ' Tidigare namn: ' + esc(former.join(', ')) + '.' : ''}` : `${esc(categoryTitle(state.category))} av typen ${esc(label)}.`}</div>
+            </div>
+            <div class="subtle">${vehicles.length} fordon</div>
+          </div>
+          <div class="section-grid">
+            ${thousands.map(row => `
+              <a class="card" href="#view=thousand&category=${encodeURIComponent(state.category)}&group=${encodeURIComponent(state.group)}&thousand=${row.thousand}">
+                <div class="eyebrow">1000-tal</div>
+                <h3>${row.thousand}-${row.thousand + 999}</h3>
+                <p>${row.vehicleCount} fordon med minst en bild i intervallet.</p>
+                <div class="badge-row">
+                  <span class="badge">${row.photoCount} bilder</span>
+                  <span class="badge">Öppna</span>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderThousand() {
+      if (!state.category || !state.group || state.thousand == null) return renderGroup();
+      const vehicles = vehiclesForGroup(state.category, state.group).filter(v => v.thousand === state.thousand);
+      if (!vehicles.length) return renderGroup();
+      const label = state.category === 'bus' ? vehicles[0].operator : vehicles[0].vehicleType;
+
+      const hundredMap = new Map();
+      vehicles.forEach(v => {
+        if (!hundredMap.has(v.hundred)) hundredMap.set(v.hundred, { hundred: v.hundred, vehicleCount: 0, photoCount: 0 });
+        const row = hundredMap.get(v.hundred);
+        row.vehicleCount += 1;
+        row.photoCount += v.images.length;
+      });
+      const hundreds = [...hundredMap.values()].sort((a, b) => a.hundred - b.hundred);
+
+      els.app.innerHTML = `
+        <section>
+          <div class="page-head">
+            <div>
+              <h2>${esc(label)} · ${state.thousand}-${state.thousand + 999}</h2>
+              <div class="subtle">Välj 100-tal för att få rutnät med thumbnails och luckor markerade som “Bild kommer”.</div>
+            </div>
+          </div>
+          <div class="section-grid">
+            ${hundreds.map(row => `
+              <a class="card" href="#view=hundred&category=${encodeURIComponent(state.category)}&group=${encodeURIComponent(state.group)}&thousand=${state.thousand}&hundred=${row.hundred}">
+                <div class="eyebrow">100-tal</div>
+                <h3>${row.hundred}-${row.hundred + 99}</h3>
+                <p>${row.vehicleCount} av 100 möjliga platser har bild.</p>
+                <div class="badge-row">
+                  <span class="badge">${row.photoCount} bilder</span>
+                  <span class="badge">10×10 grid</span>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderHundred() {
+      if (!state.category || !state.group || state.hundred == null) return renderThousand();
+      const vehicles = vehiclesForGroup(state.category, state.group).filter(v => v.hundred === state.hundred);
+      if (!vehicles.length) return renderThousand();
+      const vehicleMap = new Map(vehicles.map(v => [v.vehicleNumber, v]));
+      const label = state.category === 'bus' ? vehicles[0].operator : vehicles[0].vehicleType;
+      const present = vehicles.length;
+
+      const slots = [];
+      for (let n = state.hundred; n < state.hundred + 100; n += 1) slots.push(vehicleMap.get(n) || null);
+
+      els.app.innerHTML = `
+        <section>
+          <div class="page-head">
+            <div>
+              <h2>${esc(label)} · ${state.hundred}-${state.hundred + 99}</h2>
+              <div class="subtle">Rutnät med 100 positioner. Särskilt användbart för bussar, men fungerar lika fint för spårfordon.</div>
+            </div>
+            <div class="subtle">${present}/100 platser har bild</div>
+          </div>
+          <div class="panel grid-wrap">
+            <div class="hundred-grid">
+              ${slots.map((vehicle, idx) => {
+                const num = state.hundred + idx;
+                if (!vehicle) {
+                  return `
+                    <div class="slot missing">
+                      <div class="slot-center">${num}</div>
+                      <div class="slot-footer"><span class="chip">Bild kommer</span></div>
+                    </div>
+                  `;
+                }
+                return `
+                  <button class="slot" data-open-vehicle="${esc(vehicle.key)}" title="${esc(vehicle.displayTitle)}">
+                    <img src="${esc(vehicle.primaryImage.url)}" alt="${esc(vehicle.displayTitle)}" loading="lazy" />
+                    <div class="overlay"></div>
+                    <div class="slot-top">
+                      <span class="chip">${num}</span>
+                      <span class="chip">${vehicle.images.length} bild${vehicle.images.length > 1 ? 'er' : ''}</span>
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </section>
+      `;
+
+      els.app.querySelectorAll('[data-open-vehicle]').forEach(btn => {
+        btn.addEventListener('click', () => openVehicle(btn.getAttribute('data-open-vehicle')));
+      });
+    }
+
+    function searchVehicles(query) {
+      const q = String(query || '').trim().toLowerCase();
+      if (!q) return [];
+      return state.vehicles.filter(v => {
+        if (state.category && v.kind !== state.category) return false;
+        if (state.group) {
+          if (state.category === 'bus' && v.operatorKey !== state.group) return false;
+          if ((state.category === 'train' || state.category === 'tram') && v.vehicleTypeKey !== state.group) return false;
+        }
+        const hay = `${v.displayTitle} ${v.subTitle} ${v.kind} ${v.operator} ${v.vehicleType} ${v.vehicleNumber}`.toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    function renderSearch() {
+      const results = searchVehicles(state.q);
+      els.app.innerHTML = `
+        <section>
+          <div class="page-head">
+            <div>
+              <h2>Sökresultat</h2>
+              <div class="subtle">Sökning: ${esc(state.q)}</div>
+            </div>
+            <div class="subtle">${results.length} träff${results.length === 1 ? '' : 'ar'}</div>
+          </div>
+          ${results.length ? `
+            <div class="results-grid">
+              ${results.map(v => `
+                <article class="photo-card" data-open-vehicle="${esc(v.key)}">
+                  <img src="${esc(v.primaryImage.url)}" alt="${esc(v.displayTitle)}" loading="lazy" />
+                  <div class="photo-meta">
+                    <h3>${esc(v.displayTitle)}</h3>
+                    <p>${esc(v.subTitle || v.categoryLabel)} · ${v.images.length} bild${v.images.length > 1 ? 'er' : ''}</p>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
+          ` : `<div class="panel empty">Ingen träff. Testa till exempel <strong>Nobina 2758</strong>, <strong>X1 1223</strong> eller <strong>B45 732</strong>.</div>`}
+        </section>
+      `;
+      els.app.querySelectorAll('[data-open-vehicle]').forEach(card => {
+        card.addEventListener('click', () => openVehicle(card.getAttribute('data-open-vehicle')));
+      });
+    }
+
+    function render() {
+      renderStats();
+      renderSubFilter();
+      renderBreadcrumbs();
+
+      switch (state.currentView) {
+        case 'category': return renderCategory();
+        case 'group': return renderGroup();
+        case 'thousand': return renderThousand();
+        case 'hundred': return renderHundred();
+        case 'search': return renderSearch();
+        default: return renderHome();
+      }
+    }
+
+    function getVehicleByKey(key) {
+      return state.vehicles.find(v => v.key === key) || null;
+    }
+
+    function openVehicle(key, index = 0) {
+      const vehicle = getVehicleByKey(key);
+      if (!vehicle) return;
+      state.lightboxVehicleKey = key;
+      state.lightboxIndex = index;
+      renderLightbox(vehicle);
+      els.lightbox.classList.add('open');
+      els.lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLightbox() {
+      els.lightbox.classList.remove('open');
+      els.lightbox.setAttribute('aria-hidden', 'true');
+      state.lightboxVehicleKey = null;
+      state.lightboxIndex = 0;
+    }
+
+    function renderLightbox(vehicle) {
+      const photo = vehicle.images[state.lightboxIndex] || vehicle.images[0];
+      els.lightboxTitle.textContent = vehicle.displayTitle;
+      els.lightboxSub.textContent = `${vehicle.subTitle || vehicle.categoryLabel} · Bild ${state.lightboxIndex + 1} av ${vehicle.images.length}`;
+      els.lightboxImage.src = photo.url;
+      els.lightboxImage.alt = vehicle.displayTitle;
+      els.thumbStrip.innerHTML = vehicle.images.map((img, idx) => `
+        <button class="${idx === state.lightboxIndex ? 'active' : ''}" data-lightbox-index="${idx}" title="Bild ${idx + 1}">
+          <img src="${esc(img.url)}" alt="Miniatyr ${idx + 1}" />
+        </button>
+      `).join('');
+      els.thumbStrip.querySelectorAll('[data-lightbox-index]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.lightboxIndex = Number(btn.getAttribute('data-lightbox-index'));
+          renderLightbox(vehicle);
+        });
+      });
+    }
+
+    function stepLightbox(step) {
+      const vehicle = getVehicleByKey(state.lightboxVehicleKey);
+      if (!vehicle) return;
+      state.lightboxIndex = (state.lightboxIndex + step + vehicle.images.length) % vehicle.images.length;
+      renderLightbox(vehicle);
+    }
+
+    function onSearch() {
+      const q = els.searchInput.value.trim();
+      if (!q) {
+        if (state.category) setHash('category', { category: state.category });
+        else setHash('home');
+        return;
+      }
+      setHash('search', { category: state.category, group: state.group, q });
+    }
+
+    async function loadManifestFiles() {
+      try {
+        const res = await fetch(CONFIG.manifestUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error('manifest saknas');
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error('manifest måste vara en JSON-array');
+        return data;
+      } catch (err) {
+        console.warn('Kunde inte läsa manifest.json, använder demo-filer.', err);
+        return FALLBACK_FILES;
+      }
+    }
+
+    async function init() {
+      const files = await loadManifestFiles();
+      state.records = files.map(parseRecord).filter(Boolean);
+      state.vehicles = buildVehicleGroups(state.records);
+      readHash();
+      render();
+    }
+
+    window.addEventListener('hashchange', () => {
+      readHash();
+      render();
+    });
+
+    els.searchBtn.addEventListener('click', onSearch);
+    els.searchInput.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') onSearch();
+    });
+
+    els.categoryFilter.addEventListener('change', () => {
+      const value = els.categoryFilter.value;
+      state.category = value;
+      state.group = '';
+      if (!value) setHash('home');
+      else setHash('category', { category: value });
+    });
+
+    els.subFilter.addEventListener('change', () => {
+      const value = els.subFilter.value;
+      state.group = value;
+      if (!state.category) return setHash('home');
+      if (!value) return setHash('category', { category: state.category });
+      setHash('group', { category: state.category, group: value });
+    });
+
+    els.closeLightboxBtn.addEventListener('click', closeLightbox);
+    els.prevPhotoBtn.addEventListener('click', () => stepLightbox(-1));
+    els.nextPhotoBtn.addEventListener('click', () => stepLightbox(1));
+
+    els.lightbox.addEventListener('click', ev => {
+      if (ev.target === els.lightbox) closeLightbox();
+    });
+
+    window.addEventListener('keydown', ev => {
+      if (!els.lightbox.classList.contains('open')) return;
+      if (ev.key === 'Escape') closeLightbox();
+      if (ev.key === 'ArrowLeft') stepLightbox(-1);
+      if (ev.key === 'ArrowRight') stepLightbox(1);
+    });
+
+    init();
+  </script>
+</body>
+</html>
